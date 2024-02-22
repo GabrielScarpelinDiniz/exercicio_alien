@@ -67,51 +67,66 @@
             moeda.setBounce(0.5) //Seta um 'quique' para a moeda
 
             this.physics.add.overlap(alien, moeda, function() {
-                moeda.setVisible(false)
-                const posicaoMoeda = Phaser.Math.RND.between(50, larguraJogo*2 - 100)
-                moeda.setPosition(posicaoMoeda, 100)
-                pontuacao++
-                placar.setText(`Moedas: ${pontuacao}`)
-                moeda.setVisible(true)
+                //Função que é executada quando o alien encosta na moeda
+                
+                moeda.setVisible(false) //Esconde a moeda
+                const posicaoMoeda = Phaser.Math.RND.between(50, larguraJogo*2 - 100) //Gera uma nova posição para a moeda
+                moeda.setPosition(posicaoMoeda, 100) //Seta a nova posição da moeda
+                pontuacao++ //Aumenta a pontuação
+                placar.setText(`Moedas: ${pontuacao}`) //Atualiza o placar
+                moeda.setVisible(true) //Mostra a moeda
             } )
-            const staticGroupTest = this.physics.add.staticGroup()
+            const grupoParedes = this.physics.add.staticGroup() //Cria um grupo de objetos com física estáticos
 
-            const wallsWorld = [this.add.rectangle(0, alturaJogo/2, 5, alturaJogo, 0xee0000, 0), this.add.rectangle(larguraJogo*2, alturaJogo/2, 2, alturaJogo, 0xee0000, 0), this.add.rectangle(larguraJogo, alturaJogo, larguraJogo*2, 5, 0xee0000, 0), this.add.rectangle(larguraJogo, 0, larguraJogo*2, 2, 0xee0000, 0)]
-            for (let i of wallsWorld){
-                staticGroupTest.add(i)
-                this.physics.add.collider(i, moeda)
-                this.physics.add.collider(i, alien)
+            const paredesMundo = [this.add.rectangle(0, alturaJogo/2, 5, alturaJogo, 0xee0000, 0), this.add.rectangle(larguraJogo*2, alturaJogo/2, 2, alturaJogo, 0xee0000, 0), this.add.rectangle(larguraJogo, alturaJogo, larguraJogo*2, 5, 0xee0000, 0), this.add.rectangle(larguraJogo, 0, larguraJogo*2, 2, 0xee0000, 0)] //Array de retângulos que representam as paredes do mundo
+            for (let parede of paredesMundo){
+                grupoParedes.add(parede) //Adiciona as paredes ao grupo de objetos estáticos
+                //Adiciona colisão entre as paredes e o alien e a moeda
+                this.physics.add.collider(parede, moeda)
+                this.physics.add.collider(parede, alien)
             }
 
-
-            const platformas = [this.physics.add.staticImage(Phaser.Math.RND.between(100, 300), Phaser.Math.RND.between(100, alturaJogo - 100), 'plataforma_tijolo'), this.physics.add.staticImage(Phaser.Math.RND.between(500, 700), Phaser.Math.RND.between(100, alturaJogo - 200), 'plataforma_tijolo'), this.physics.add.staticImage(Phaser.Math.RND.between(900, 1200), Phaser.Math.RND.between(100, alturaJogo - 100), 'plataforma_tijolo')]
-            for (let plataforma of platformas) {
+            //Cria plataformas estáticas com posições aleatórias no jogo
+            const plataformas = [this.physics.add.staticImage(Phaser.Math.RND.between(100, 300), Phaser.Math.RND.between(100, alturaJogo - 100), 'plataforma_tijolo'), this.physics.add.staticImage(Phaser.Math.RND.between(500, 700), Phaser.Math.RND.between(100, alturaJogo - 200), 'plataforma_tijolo'), this.physics.add.staticImage(Phaser.Math.RND.between(900, 1200), Phaser.Math.RND.between(100, alturaJogo - 100), 'plataforma_tijolo')]
+            for (let plataforma of plataformas) {
+                //Adiciona colisão entre as plataformas e o alien e a moeda
                 this.physics.add.collider(plataforma, alien)
                 this.physics.add.collider(plataforma, moeda)
             }
-            this.cameras.main.setBounds(0, 0 , 730*2, alturaJogo)
-            this.cameras.main.startFollow(alien, true);
-            this.cameras.main.setZoom(1)
-            teclado = this.input.keyboard.createCursorKeys();
+
+            //Visto no autoestudo de câmeras
+            this.cameras.main.setBounds(0, 0 , 730*2, alturaJogo) //Seta os limites da câmera
+            this.cameras.main.startFollow(alien, true); //Coloca a câmera para seguir o personagem
+            this.cameras.main.setZoom(1) //Deixa o zoom como default (1x)
+
+
+            teclado = this.input.keyboard.createCursorKeys(); //Seta a variável teclado com o objeto retornado pela função com os estados do teclado
         }
 
         function update() {
+            //Função que se repete sem parar durante o jogo
+            
             if (teclado.left.isDown) {
+                //Se a seta está para a esquerda, seta a velocidade no X para trás
                 alien.setVelocityX(-150);
             }
             else if (teclado.right.isDown) {
+                //Se a seta está para a direita, seta a velocidade no X para frente
                 alien.setVelocityX(150);
             }
             else {
+                //Se não seta a velocidade no x como zero
                 alien.setVelocityX(0);
             }
             if (teclado.up.isDown) {
+                //Se a seta está para cima, seta a velocidade no Y para cima e ativa o fogo
                 alien.setVelocityY(-150);
                 fogo.setVisible(true)
             }
-            else fogo.setVisible(false)
-            fogo.setPosition(alien.x, alien.y + alien.height/2)
-            placar.setPosition(this.cameras.main.scrollX + 50, 50)
+            else fogo.setVisible(false) //Se não está para cima, seta o fogo sem visibilidade
+
+            fogo.setPosition(alien.x, alien.y + alien.height/2) //Seta a posição do fogo embaixo do alien
+            placar.setPosition(this.cameras.main.scrollX + 50, 50) //Para o placar acompanhar a câmera
         }
     </script>
 </body>
