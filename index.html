@@ -63,6 +63,10 @@
             alien = this.physics.add.sprite(larguraJogo/2, 0, 'player'); //Adiciona a nave do alien
             moeda = this.physics.add.sprite(larguraJogo/2, 0, 'moeda'); //Adiciona a moeda
             placar = this.add.text(50, 50, 'Moedas:' + pontuacao, {fontSize:'45px', fill:'#495613'}); //Adiciona o placaar
+            
+            //As duas linhas foram removidas para implementação da camera
+            //alien.setCollideWorldBouns(true) 
+            //moeda.setCollideWorldBouns(true)
 
             moeda.setBounce(0.5) //Seta um 'quique' para a moeda
 
@@ -121,12 +125,19 @@
             if (teclado.up.isDown) {
                 //Se a seta está para cima, seta a velocidade no Y para cima e ativa o fogo
                 alien.setVelocityY(-150);
-                fogo.setVisible(true)
+                ativarTurbo()
             }
-            else fogo.setVisible(false) //Se não está para cima, seta o fogo sem visibilidade
+            //Usando notação abreviada do JS abaixo, como o else só vai executar um comando não precisa das chaves
+            else  semTurbo()//Se não está para cima, seta o fogo sem visibilidade
 
             fogo.setPosition(alien.x, alien.y + alien.height/2) //Seta a posição do fogo embaixo do alien
             placar.setPosition(this.cameras.main.scrollX + 50, 50) //Para o placar acompanhar a câmera
+        }
+        function ativarTurbo(){
+            fogo.setVisible(true)
+        }
+        function semTurbo(){
+            fogo.setVisible(false)
         }
     </script>
 </body>
