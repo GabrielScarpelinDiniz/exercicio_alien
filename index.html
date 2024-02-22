@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercício do Alien</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style> body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; } </style>
+</head>
+
+<body>
+    <script>
+        //Seta a altura e largura da tela do jogo
+        const larguraJogo = 700;
+        const alturaJogo = 850;
+
+        let alien; //Guarda o player
+        let teclado; //Armazena o objeto com as teclas e status do teclado
+        let fogo; //Armazena o elemento fogo do Alien
+        let pontuacao = 0; //Pontuação do usuário
+        let placar; //Armazena o texto do placar
+        let moeda; //Moeda que cai durante o jogo
+
+
+        // Cria o objeto de configuração do phaser, passando os parametros como a largura do jogo e altura do jogo
+        const config = {
+            type: Phaser.AUTO,
+            width: larguraJogo,
+            height: alturaJogo,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 200 },
+                    debug: true,
+                },
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+
+        // Instancia a classe Phaser.Game passando a config como parametro, iniciando o jogo
+        const game = new Phaser.Game(config);
+
+        function preload() {
+            //Função que carrega as coisas como imagens, áudios, etc
+            this.load.image('background', 'assets/bg.png');
+            this.load.image('fogo', 'assets/turbo.png')
+            this.load.image('player', 'assets/alienigena.png')
+            this.load.image('plataforma_tijolo', 'assets/tijolos.png')
+            this.load.image('moeda', 'assets/moeda.png')
+        }
+
+        function create() {
+            // Função que cria/adiciona os objetos que serão usados no jogo, como imagens etc
+            this.add.image(larguraJogo/2, alturaJogo/2, 'background');
+            this.add.image(larguraJogo + larguraJogo/2, alturaJogo/2, 'background'); //Adiciona mais um background
+
+
+            fogo = this.add.image(-10, -10, 'fogo') //Adiciona o fogo usado na nave do alien
+            alien = this.physics.add.sprite(larguraJogo/2, 0, 'player'); //Adiciona a nave do alien
+            moeda = this.physics.add.sprite(larguraJogo/2, 0, 'moeda'); //Adiciona a moeda
+            placar = this.add.text(50, 50, 'Moedas:' + pontuacao, {fontSize:'45px', fill:'#495613'}); //Adiciona o placaar
+
+            moeda.setBounce(0.5) //Seta um 'quique' para a moeda
+
+            this.physics.add.overlap(alien, moeda, function() {
+                moeda.setVisible(false)
+                const posicaoMoeda = Phaser.Math.RND.between(50, larguraJogo*2 - 100)
+                moeda.setPosition(posicaoMoeda, 100)
+                pontuacao++
+                placar.setText(`Moedas: ${pontuacao}`)
+                moeda.setVisible(true)
+            } )
+            const staticGroupTest = this.physics.add.staticGroup()
+
+            const wallsWorld = [this.add.rectangle(0, alturaJogo/2, 5, alturaJogo, 0xee0000, 0), this.add.rectangle(larguraJogo*2, alturaJogo/2, 2, alturaJogo, 0xee0000, 0), this.add.rectangle(larguraJogo, alturaJogo, larguraJogo*2, 5, 0xee0000, 0), this.add.rectangle(larguraJogo, 0, larguraJogo*2, 2, 0xee0000, 0)]
+            for (let i of wallsWorld){
+                staticGroupTest.add(i)
+                this.physics.add.collider(i, moeda)
+                this.physics.add.collider(i, alien)
+            }
+
+
+            const platformas = [this.physics.add.staticImage(Phaser.Math.RND.between(100, 300), Phaser.Math.RND.between(100, alturaJogo - 100), 'plataforma_tijolo'), this.physics.add.staticImage(Phaser.Math.RND.between(500, 700), Phaser.Math.RND.between(100, alturaJogo - 200), 'plataforma_tijolo'), this.physics.add.staticImage(Phaser.Math.RND.between(900, 1200), Phaser.Math.RND.between(100, alturaJogo - 100), 'plataforma_tijolo')]
+            for (let plataforma of platformas) {
+                this.physics.add.collider(plataforma, alien)
+                this.physics.add.collider(plataforma, moeda)
+            }
+            this.cameras.main.setBounds(0, 0 , 730*2, alturaJogo)
+            this.cameras.main.startFollow(alien, true);
+            this.cameras.main.setZoom(1)
+            teclado = this.input.keyboard.createCursorKeys();
+        }
+
+        function update() {
+            if (teclado.left.isDown) {
+                alien.setVelocityX(-150);
+            }
+            else if (teclado.right.isDown) {
+                alien.setVelocityX(150);
+            }
+            else {
+                alien.setVelocityX(0);
+            }
+            if (teclado.up.isDown) {
+                alien.setVelocityY(-150);
+                fogo.setVisible(true)
+            }
+            else fogo.setVisible(false)
+            fogo.setPosition(alien.x, alien.y + alien.height/2)
+            placar.setPosition(this.cameras.main.scrollX + 50, 50)
+        }
+    </script>
+</body>
+</html>
